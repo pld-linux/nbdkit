@@ -6,15 +6,16 @@
 Summary:	Toolkit for creating NBD servers
 Summary(pl.UTF-8):	Narzędzia do tworzenia serwerów NBD
 Name:		nbdkit
-Version:	1.1.3
+Version:	1.1.4
 Release:	1
 License:	BSD
 Group:		Applications/System
 Source0:	http://libguestfs.org/download/nbdkit/%{name}-%{version}.tar.gz
-# Source0-md5:	d3bab589844243cd2572d02cb0b96a69
+# Source0-md5:	2b9cd160032c0a3889b8588d8e720ffe
 URL:		http://libguestfs.org/
 BuildRequires:	libguestfs-devel
 BuildRequires:	libvirt-devel
+BuildRequires:	perl-devel
 BuildRequires:	perl-tools-pod
 BuildRequires:	pkgconfig
 BuildRequires:	xz-devel
@@ -56,6 +57,18 @@ libvirt plugin for nbdkit.
 
 %description plugin-libvirt -l pl.UTF-8
 Wtyczka libvirt dla nbdkitu.
+
+%package plugin-perl
+Summary:	Perl embed plugin for nbdkit
+Summary(pl.UTF-8):	Wtyczka wbudowanego Perla dla nbdkitu
+Group:		Libraries
+Requires:	%{name} = %{version}-%{release}
+
+%description plugin-perl
+Perl embed plugin for nbdkit.
+
+%description plugin-perl -l pl.UTF-8
+Wtyczka wbudowanego Perla dla nbdkitu.
 
 %package plugin-vddk
 Summary:	VMware VDDK plugin for nbdkit
@@ -132,6 +145,11 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-libvirt-plugin.so
 %{_mandir}/man1/nbdkit-libvirt-plugin.1*
+
+%files plugin-perl
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-perl-plugin.so
+%{_mandir}/man1/nbdkit-perl-plugin.1*
 
 %if %{with vddk}
 %files plugin-vddk
