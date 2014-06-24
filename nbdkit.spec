@@ -6,13 +6,14 @@
 Summary:	Toolkit for creating NBD servers
 Summary(pl.UTF-8):	Narzędzia do tworzenia serwerów NBD
 Name:		nbdkit
-Version:	1.1.6
+Version:	1.1.8
 Release:	1
 License:	BSD
 Group:		Applications/System
 Source0:	http://libguestfs.org/download/nbdkit/%{name}-%{version}.tar.gz
-# Source0-md5:	e903a3d44ff4229800ffda604812f5a0
+# Source0-md5:	9b301dd4eecbb2d076d01963b60975aa
 URL:		http://libguestfs.org/
+BuildRequires:	curl-devel
 BuildRequires:	libguestfs-devel
 BuildRequires:	libvirt-devel
 BuildRequires:	perl-devel
@@ -34,6 +35,18 @@ NBD (Network Block Device) to protokół sieciowego dostępu do urządzeń
 blokowych (dysków twardych i podobnego osprzętu).
 
 nbdkit to zestaw narzędzi do tworzenia serwerów NBD.
+
+%package plugin-curl
+Summary:	curl plugin for nbdkit
+Summary(pl.UTF-8):	Wtyczka curl dla nbdkitu
+Group:		Libraries
+Requires:	%{name} = %{version}-%{release}
+
+%description plugin-curl
+curl plugin for nbdkit.
+
+%description plugin-curl -l pl.UTF-8
+Wtyczka curl dla nbdkitu.
 
 %package plugin-guestfs
 Summary:	guestfs plugin for nbdkit
@@ -148,6 +161,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/nbdkit-file-plugin.1*
 %{_mandir}/man1/nbdkit-gzip-plugin.1*
 %{_mandir}/man1/nbdkit-xz-plugin.1*
+
+%files plugin-curl
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-curl-plugin.so
+%{_mandir}/man1/nbdkit-curl-plugin.1*
 
 %files plugin-guestfs
 %defattr(644,root,root,755)
