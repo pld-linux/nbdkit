@@ -6,12 +6,12 @@
 Summary:	Toolkit for creating NBD servers
 Summary(pl.UTF-8):	Narzędzia do tworzenia serwerów NBD
 Name:		nbdkit
-Version:	1.1.8
-Release:	2
+Version:	1.1.9
+Release:	1
 License:	BSD
 Group:		Applications/System
 Source0:	http://libguestfs.org/download/nbdkit/%{name}-%{version}.tar.gz
-# Source0-md5:	9b301dd4eecbb2d076d01963b60975aa
+# Source0-md5:	518a6b4554275424505bfebe0820d11b
 URL:		http://libguestfs.org/
 BuildRequires:	curl-devel
 BuildRequires:	libguestfs-devel
@@ -153,6 +153,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-example3-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-file-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-gzip-plugin.so
+%attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-streaming-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-xz-plugin.so
 %{_mandir}/man1/nbdkit.1*
 %{_mandir}/man1/nbdkit-example1-plugin.1*
@@ -160,6 +161,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/nbdkit-example3-plugin.1*
 %{_mandir}/man1/nbdkit-file-plugin.1*
 %{_mandir}/man1/nbdkit-gzip-plugin.1*
+%{_mandir}/man1/nbdkit-streaming-plugin.1*
 %{_mandir}/man1/nbdkit-xz-plugin.1*
 
 %files plugin-curl
