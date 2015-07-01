@@ -1,28 +1,34 @@
 #
 # Conditional build:
+%bcond_without	ocaml		# OCaml plugin
+%bcond_without	perl		# Perl plugin
+%bcond_without	python		# Python plugin
 %bcond_with	vddk		# VMware VDDK plugin [needs proprietary VDDK]
 #
-%include	/usr/lib/rpm/macros.perl
 Summary:	Toolkit for creating NBD servers
 Summary(pl.UTF-8):	Narzędzia do tworzenia serwerów NBD
 Name:		nbdkit
-Version:	1.1.9
+Version:	1.1.10
 Release:	1
 License:	BSD
 Group:		Applications/System
 Source0:	http://libguestfs.org/download/nbdkit/%{name}-%{version}.tar.gz
-# Source0-md5:	518a6b4554275424505bfebe0820d11b
+# Source0-md5:	dfe0fb6de944b4fe97f7c8c8a8f83f07
 URL:		http://libguestfs.org/
 BuildRequires:	curl-devel
 BuildRequires:	libguestfs-devel
 BuildRequires:	libvirt-devel
-BuildRequires:	perl-devel
+%{?with_ocaml:BuildRequires:	ocaml}
+%{?with_perl:BuildRequires:	perl-devel}
 BuildRequires:	perl-tools-pod
 BuildRequires:	pkgconfig
-BuildRequires:	python-devel >= 2
+%{?with_python:BuildRequires:	python-devel >= 2}
 BuildRequires:	xz-devel
 BuildRequires:	zlib-devel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
+
+# depends on symbols from nbdkit binary and ocaml ABI
+%define		skip_post_check_so	libnbdkitocaml.so.*
 
 %description
 NBD is a protocol for accessing Block Devices (hard disks and
@@ -71,6 +77,19 @@ libvirt plugin for nbdkit.
 
 %description plugin-libvirt -l pl.UTF-8
 Wtyczka libvirt dla nbdkitu.
+
+%package plugin-ocaml
+Summary:	OCaml embed plugin for nbdkit
+Summary(pl.UTF-8):	Wtyczka wbudowanego OCamla dla nbdkitu
+Group:		Libraries
+Requires:	%{name} = %{version}-%{release}
+Requires:	ocaml-runtime
+
+%description plugin-ocaml
+OCaml embed plugin for nbdkit.
+
+%description plugin-ocaml -l pl.UTF-8
+Wtyczka wbudowanego OCamla dla nbdkitu.
 
 %package plugin-perl
 Summary:	Perl embed plugin for nbdkit
@@ -126,6 +145,10 @@ Plik nagłówkowy dla wtyczek nbdkit.
 %build
 %configure \
 	GUESTFISH=no \
+	%{!?with_ocaml:--disable-ocaml} \
+	%{!?with_perl:--disable-perl} \
+	%{!?with_python:--disable-python} \
+	--disable-static \
 	%{?with_vddk:--with-vddk}
 
 %{__make} \
@@ -138,9 +161,13 @@ rm -rf $RPM_BUILD_ROOT
 	DESTDIR=$RPM_BUILD_ROOT
 
 %{__rm} $RPM_BUILD_ROOT%{_libdir}/nbdkit/plugins/*.la
+%{__rm} $RPM_BUILD_ROOT%{_libdir}/libnbdkitocaml.la
 
 %clean
 rm -rf $RPM_BUILD_ROOT
+
+%post	plugin-ocaml -p /sbin/ldconfig
+%postun	plugin-ocaml -p /sbin/ldconfig
 
 %files
 %defattr(644,root,root,755)
@@ -179,15 +206,31 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-libvirt-plugin.so
 %{_mandir}/man1/nbdkit-libvirt-plugin.1*
 
+%if %{with ocaml}
+%files plugin-ocaml
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/libnbdkitocaml.so.*.*.*
+%attr(755,root,root) %ghost %{_libdir}/libnbdkitocaml.so.0
+%attr(755,root,root) %{_libdir}/libnbdkitocaml.so
+%{_libdir}/ocaml/NBDKit.cm[ix]
+%{_libdir}/ocaml/NBDKit.mli
+%{_libdir}/ocaml/NBDKit.o
+%{_mandir}/man3/nbdkit-ocaml-plugin.3*
+%endif
+
+%if %{with perl}
 %files plugin-perl
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-perl-plugin.so
 %{_mandir}/man3/nbdkit-perl-plugin.3*
+%endif
 
+%if %{with python}
 %files plugin-python
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-python-plugin.so
 %{_mandir}/man3/nbdkit-python-plugin.3*
+%endif
 
 %if %{with vddk}
 %files plugin-vddk
