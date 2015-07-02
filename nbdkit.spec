@@ -18,7 +18,7 @@ URL:		http://libguestfs.org/
 BuildRequires:	curl-devel
 BuildRequires:	libguestfs-devel
 BuildRequires:	libvirt-devel
-%{?with_ocaml:BuildRequires:	ocaml}
+%{?with_ocaml:BuildRequires:	ocaml >= 4.02.2}
 %{?with_perl:BuildRequires:	perl-devel}
 BuildRequires:	perl-tools-pod
 BuildRequires:	pkgconfig
