@@ -1,15 +1,19 @@
 #
 # Conditional build:
-%bcond_without	ocaml		# OCaml plugin
+%bcond_without	ocaml		# OCaml plugin (requires ocaml_opt support)
 %bcond_without	perl		# Perl plugin
 %bcond_without	python		# Python plugin
 %bcond_with	vddk		# VMware VDDK plugin [needs proprietary VDDK]
 #
+%ifarch x32
+# no ocaml_opt support
+%undefine	with_ocaml
+%endif
 Summary:	Toolkit for creating NBD servers
 Summary(pl.UTF-8):	Narzędzia do tworzenia serwerów NBD
 Name:		nbdkit
 Version:	1.1.10
-Release:	1
+Release:	2
 License:	BSD
 Group:		Applications/System
 Source0:	http://libguestfs.org/download/nbdkit/%{name}-%{version}.tar.gz
@@ -161,7 +165,9 @@ rm -rf $RPM_BUILD_ROOT
 	DESTDIR=$RPM_BUILD_ROOT
 
 %{__rm} $RPM_BUILD_ROOT%{_libdir}/nbdkit/plugins/*.la
+%if %{with ocaml}
 %{__rm} $RPM_BUILD_ROOT%{_libdir}/libnbdkitocaml.la
+%endif
 
 %clean
 rm -rf $RPM_BUILD_ROOT
