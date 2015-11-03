@@ -5,7 +5,7 @@
 %bcond_without	python		# Python plugin
 %bcond_with	vddk		# VMware VDDK plugin [needs proprietary VDDK]
 #
-%ifarch x32
+%ifnarch %{ix86} %{x8664} arm aarch64 ppc sparc sparcv9
 # no ocaml_opt support
 %undefine	with_ocaml
 %endif
