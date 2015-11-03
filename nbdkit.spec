@@ -12,12 +12,12 @@
 Summary:	Toolkit for creating NBD servers
 Summary(pl.UTF-8):	Narzędzia do tworzenia serwerów NBD
 Name:		nbdkit
-Version:	1.1.10
-Release:	2
+Version:	1.1.11
+Release:	1
 License:	BSD
 Group:		Applications/System
 Source0:	http://libguestfs.org/download/nbdkit/%{name}-%{version}.tar.gz
-# Source0-md5:	dfe0fb6de944b4fe97f7c8c8a8f83f07
+# Source0-md5:	c03d66a7ad5f7f08a171d6845dc28c48
 URL:		http://libguestfs.org/
 BuildRequires:	curl-devel
 BuildRequires:	libguestfs-devel
