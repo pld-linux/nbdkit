@@ -13,14 +13,17 @@ Summary:	Toolkit for creating NBD servers
 Summary(pl.UTF-8):	Narzędzia do tworzenia serwerów NBD
 Name:		nbdkit
 Version:	1.1.11
-Release:	2
+Release:	3
 License:	BSD
 Group:		Applications/System
 Source0:	http://libguestfs.org/download/nbdkit/%{name}-%{version}.tar.gz
 # Source0-md5:	c03d66a7ad5f7f08a171d6845dc28c48
 URL:		http://libguestfs.org/
+BuildRequires:	autoconf >= 2.50
+BuildRequires:	automake
 BuildRequires:	curl-devel
 BuildRequires:	libguestfs-devel
+BuildRequires:	libtool >= 2:2
 BuildRequires:	libvirt-devel
 %{?with_ocaml:BuildRequires:	ocaml >= 4.02.2}
 %{?with_perl:BuildRequires:	perl-devel}
@@ -147,6 +150,11 @@ Plik nagłówkowy dla wtyczek nbdkit.
 %setup -q
 
 %build
+%{__libtoolize}
+%{__aclocal} -I m4
+%{__autoconf}
+%{__autoheader}
+%{__automake}
 %configure \
 	GUESTFISH=no \
 	%{!?with_ocaml:--disable-ocaml} \
