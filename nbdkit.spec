@@ -27,6 +27,7 @@ BuildRequires:	automake
 BuildRequires:	curl-devel
 BuildRequires:	libguestfs-devel
 BuildRequires:	libtool >= 2:2
+BuildRequires:	libtorrent-rasterbar-devel
 BuildRequires:	libvirt-devel
 %{?with_ocaml:BuildRequires:	ocaml >= 4.02.2}
 %{?with_perl:BuildRequires:	perl-devel}
