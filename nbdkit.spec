@@ -277,7 +277,6 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-tcl-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-tmpdisk-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-torrent-plugin.so
-%attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-vddk-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-zero-plugin.so
 %{_mandir}/man1/nbdkit.1*
 %{_mandir}/man1/nbdkit-blocksize-filter.1*
@@ -360,7 +359,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/nbdkit-tmpdisk-plugin.1*
 %{_mandir}/man1/nbdkit-torrent-plugin.1*
 %{_mandir}/man1/nbdkit-truncate-filter.1*
-%{_mandir}/man1/nbdkit-vddk-plugin.1*
 %{_mandir}/man1/nbdkit-xz-filter.1*
 %{_mandir}/man1/nbdkit-zero-plugin.1*
 
