@@ -1,15 +1,17 @@
 #
 # Conditional build:
+%bcond_with	go		# GO plugin
 %bcond_without	ocaml		# OCaml plugin (requires ocaml_opt support)
 %bcond_without	perl		# Perl plugin
 %bcond_without	python		# Python plugin
 %bcond_with	rust		# Rust plugin
 %bcond_with	vddk		# VMware VDDK plugin [needs proprietary VDDK]
 #
-%ifnarch %{ix86} %{x8664} arm aarch64 ppc sparc sparcv9
-# no ocaml_opt support
+%ifnarch %{ix86} %{x8664} %{arm} aarch64 ppc sparc sparcv9
 %undefine	with_ocaml
+%undefine	with_go
 %endif
+
 Summary:	Toolkit for creating NBD servers
 Summary(pl.UTF-8):	Narzędzia do tworzenia serwerów NBD
 Name:		nbdkit
@@ -86,6 +88,18 @@ libvirt plugin for nbdkit.
 %description plugin-libvirt -l pl.UTF-8
 Wtyczka libvirt dla nbdkitu.
 
+%package plugin-go
+Summary:	Go embed plugin for nbdkit
+Summary(pl.UTF-8):	Wtyczka wbudowanego Go dla nbdkitu
+Group:		Libraries
+Requires:	%{name} = %{version}-%{release}
+
+%description plugin-go
+Go embed plugin for nbdkit.
+
+%description plugin-go -l pl.UTF-8
+Wtyczka wbudowanego Go dla nbdkitu.
+
 %package plugin-ocaml
 Summary:	OCaml embed plugin for nbdkit
 Summary(pl.UTF-8):	Wtyczka wbudowanego OCamla dla nbdkitu
@@ -158,6 +172,7 @@ Plik nagłówkowy dla wtyczek nbdkit.
 %{__automake}
 %configure \
 	GUESTFISH=no \
+	%{!?with_go:--disable-golang} \
 	%{!?with_ocaml:--disable-ocaml} \
 	%{!?with_perl:--disable-perl} \
 	%{!?with_python:--disable-python} \
@@ -363,6 +378,13 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-libvirt-plugin.so
 %{_mandir}/man1/nbdkit-libvirt-plugin.1*
 
+%if %{with go}
+%files plugin-go
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-golang-plugin.so
+%{_mandir}/man3/nbdkit-golang-plugin.3*
+%endif
+
 %if %{with ocaml}
 %files plugin-ocaml
 %defattr(644,root,root,755)
@@ -408,7 +430,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/NBDKit.3*
 %{_mandir}/man3/nbdkit-cc-plugin.3*
 %{_mandir}/man3/nbdkit-filter.3*
-%{_mandir}/man3/nbdkit-golang-plugin.3*
 %{_mandir}/man3/nbdkit-lua-plugin.3*
 %{_mandir}/man3/nbdkit-sh-plugin.3*
 %{_mandir}/man3/nbdkit-tcl-plugin.3*
