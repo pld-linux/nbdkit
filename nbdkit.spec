@@ -3,6 +3,7 @@
 %bcond_without	ocaml		# OCaml plugin (requires ocaml_opt support)
 %bcond_without	perl		# Perl plugin
 %bcond_without	python		# Python plugin
+%bcond_with	rust		# Rust plugin
 %bcond_with	vddk		# VMware VDDK plugin [needs proprietary VDDK]
 #
 %ifnarch %{ix86} %{x8664} arm aarch64 ppc sparc sparcv9
@@ -160,6 +161,7 @@ Plik nagłówkowy dla wtyczek nbdkit.
 	%{!?with_ocaml:--disable-ocaml} \
 	%{!?with_perl:--disable-perl} \
 	%{!?with_python:--disable-python} \
+	%{!?with_rust:--disable-rust} \
 	--disable-static \
 	%{?with_vddk:--with-vddk}
 
@@ -408,6 +410,5 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/nbdkit-filter.3*
 %{_mandir}/man3/nbdkit-golang-plugin.3*
 %{_mandir}/man3/nbdkit-lua-plugin.3*
-%{_mandir}/man3/nbdkit-rust-plugin.3*
 %{_mandir}/man3/nbdkit-sh-plugin.3*
 %{_mandir}/man3/nbdkit-tcl-plugin.3*
