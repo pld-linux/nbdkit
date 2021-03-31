@@ -33,7 +33,7 @@ BuildRequires:	libvirt-devel
 %{?with_perl:BuildRequires:	perl-devel}
 BuildRequires:	perl-tools-pod
 BuildRequires:	pkgconfig
-%{?with_python:BuildRequires:	python-devel >= 2}
+%{?with_python:BuildRequires:	python3-devel}
 BuildRequires:	xz-devel
 BuildRequires:	zlib-devel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -173,6 +173,7 @@ Plik nagłówkowy dla wtyczek nbdkit.
 %{__automake}
 %configure \
 	GUESTFISH=no \
+	MKISOFS=/usr/bin/mkisofs \
 	%{!?with_go:--disable-golang} \
 	%{!?with_ocaml:--disable-ocaml} \
 	%{!?with_perl:--disable-perl} \
