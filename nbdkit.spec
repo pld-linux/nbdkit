@@ -26,6 +26,7 @@ BuildRequires:	autoconf >= 2.50
 BuildRequires:	automake
 BuildRequires:	curl-devel
 BuildRequires:	libguestfs-devel
+BuildRequires:	libnbd-devel >= 0.9.8
 BuildRequires:	libtool >= 2:2
 BuildRequires:	libtorrent-rasterbar-devel
 BuildRequires:	libvirt-devel
@@ -263,6 +264,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-iso-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-lua-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-memory-plugin.so
+%attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-nbd-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-null-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-ondemand-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-partitioning-plugin.so
@@ -314,6 +316,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/nbdkit-log-filter.1*
 %{_mandir}/man1/nbdkit-loop.1*
 %{_mandir}/man1/nbdkit-memory-plugin.1*
+%{_mandir}/man1/nbdkit-nbd-plugin.1*
 %{_mandir}/man1/nbdkit-nocache-filter.1*
 %{_mandir}/man1/nbdkit-noextents-filter.1*
 %{_mandir}/man1/nbdkit-nofilter-filter.1*
