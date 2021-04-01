@@ -393,6 +393,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/ocaml/NBDKit.cm[ix]
 %{_libdir}/ocaml/NBDKit.mli
 %{_libdir}/ocaml/NBDKit.o
+%{_mandir}/man3/NBDKit.3*
 %{_mandir}/man3/nbdkit-ocaml-plugin.3*
 %endif
 
@@ -426,7 +427,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/nbd-protocol.h
 %{_mandir}/man3/nbdkit-plugin.3*
 %{_pkgconfigdir}/nbdkit.pc
-%{_mandir}/man3/NBDKit.3*
 %{_mandir}/man3/nbdkit-cc-plugin.3*
 %{_mandir}/man3/nbdkit-filter.3*
 %{_mandir}/man3/nbdkit-lua-plugin.3*
