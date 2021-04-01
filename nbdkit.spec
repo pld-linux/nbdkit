@@ -210,7 +210,6 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_sbindir}/nbdkit
 %dir %{_libdir}/nbdkit
 %dir %{_libdir}/nbdkit/filters
-%attr(755,root,root) %{_libdir}/nbdkit/filters
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-blocksize-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-cache-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-cacheextents-filter.so
