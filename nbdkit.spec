@@ -1,15 +1,20 @@
+# TODO:
+# --enable-valgrind (valgrind extensions)?
 #
 # Conditional build:
-%bcond_with	go		# GO plugin
-%bcond_without	ocaml		# OCaml plugin (requires ocaml_opt support)
-%bcond_without	perl		# Perl plugin
-%bcond_without	python		# Python plugin
-%bcond_with	rust		# Rust plugin
+%bcond_with	golang		# Go language plugin
+%bcond_without	lua		# Lua language plugin
+%bcond_without	ocaml		# OCaml language plugin (requires ocaml_opt support)
+%bcond_without	perl		# Perl language plugin
+%bcond_without	python		# Python language plugin
+%bcond_without	ruby		# Ruby language plugin
+%bcond_with	rust		# Rust language plugin
+%bcond_without	tcl		# Tcl language plugin
 %bcond_with	vddk		# VMware VDDK plugin [needs proprietary VDDK]
 #
 %ifnarch %{ix86} %{x8664} %{arm} aarch64 ppc sparc sparcv9
 %undefine	with_ocaml
-%undefine	with_go
+%undefine	with_golang
 %endif
 
 Summary:	Toolkit for creating NBD servers
@@ -19,24 +24,39 @@ Version:	1.24.2
 Release:	5
 License:	BSD
 Group:		Applications/System
-Source0:	http://libguestfs.org/download/nbdkit/1.24-stable/%{name}-%{version}.tar.gz
+Source0:	https://download.libguestfs.org/nbdkit/1.24-stable/%{name}-%{version}.tar.gz
 # Source0-md5:	ba9319e544d5a728ebfee84953968b9e
-URL:		http://libguestfs.org/
+URL:		https://libguestfs.org/
 BuildRequires:	autoconf >= 2.50
 BuildRequires:	automake
+BuildRequires:	bash-completion-devel >= 1:2.0
+%{?with_rust:BuildRequires:	cargo}
 BuildRequires:	curl-devel
+# for mke2fs options detection (incl. -d option support)
+BuildRequires:	e2fsprogs >= 1.43
+BuildRequires:	e2fsprogs-devel
+BuildRequires:	gnutls-devel >= 3.3.0
+%{?with_golang:BuildRequires:	golang-devel}
+BuildRequires:	libcom_err-devel
 BuildRequires:	libguestfs-devel
 BuildRequires:	libnbd-devel >= 0.9.8
+BuildRequires:	libselinux-devel >= 2.0.90
+BuildRequires:	libssh-devel >= 0.8.0
 BuildRequires:	libtool >= 2:2
 BuildRequires:	libtorrent-rasterbar-devel
 BuildRequires:	libvirt-devel
+%{?with_lua:BuildRequires:	lua-devel >= 5.1}
 %{?with_ocaml:BuildRequires:	ocaml >= 4.02.2}
 %{?with_perl:BuildRequires:	perl-devel}
 BuildRequires:	perl-tools-pod
 BuildRequires:	pkgconfig
-%{?with_python:BuildRequires:	python3-devel}
+%{?with_python:BuildRequires:	python3-devel >= 1:3.2}
+%{?with_ruby:BuildRequires:	ruby-devel >= 1:2.6}
+BuildRequires:	sed >= 4.0
+%{?with_tcl:BuildRequires:	tcl-devel >= 8.6}
 BuildRequires:	xz-devel
-BuildRequires:	zlib-devel
+BuildRequires:	zlib-devel >= 1.2.3.5
+BuildRequires:	zstd-devel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 # depends on symbols from nbdkit binary and ocaml ABI
@@ -53,6 +73,19 @@ NBD (Network Block Device) to protokół sieciowego dostępu do urządzeń
 blokowych (dysków twardych i podobnego osprzętu).
 
 nbdkit to zestaw narzędzi do tworzenia serwerów NBD.
+
+%package -n bash-completion-nbdkit
+Summary:	Bash completion for nbdkit commands
+Summary(pl.UTF-8):	Bashowe uzupełnianie składni poleceń nbdkit
+Group:		Applications/Shells
+Requires:	%{name} = %{version}-%{release}
+Requires:	bash-completion >= 1:2.0
+
+%description -n bash-completion-nbdkit
+Bash completion for nbdkit commands.
+
+%description -n bash-completion-nbdkit -l pl.UTF-8
+Bashowe uzupełnianie składni poleceń nbdkit.
 
 %package plugin-curl
 Summary:	curl plugin for nbdkit
@@ -102,6 +135,18 @@ Go embed plugin for nbdkit.
 %description plugin-go -l pl.UTF-8
 Wtyczka wbudowanego Go dla nbdkitu.
 
+%package plugin-lua
+Summary:	Lua embed plugin for nbdkit
+Summary(pl.UTF-8):	Wtyczka wbudowanego Lua dla nbdkitu
+Group:		Libraries
+Requires:	%{name} = %{version}-%{release}
+
+%description plugin-lua
+Lua embed plugin for nbdkit.
+
+%description plugin-lua -l pl.UTF-8
+Wtyczka wbudowanego Lua dla nbdkitu.
+
 %package plugin-ocaml
 Summary:	OCaml embed plugin for nbdkit
 Summary(pl.UTF-8):	Wtyczka wbudowanego OCamla dla nbdkitu
@@ -139,6 +184,18 @@ Python embed plugin for nbdkit.
 %description plugin-python -l pl.UTF-8
 Wtyczka wbudowanego Pythona dla nbdkitu.
 
+%package plugin-ruby
+Summary:	Ruby embed plugin for nbdkit
+Summary(pl.UTF-8):	Wtyczka wbudowanego Ruby dla nbdkitu
+Group:		Libraries
+Requires:	%{name} = %{version}-%{release}
+
+%description plugin-ruby
+Ruby embed plugin for nbdkit.
+
+%description plugin-ruby -l pl.UTF-8
+Wtyczka wbudowanego Ruby dla nbdkitu.
+
 %package plugin-vddk
 Summary:	VMware VDDK plugin for nbdkit
 Summary(pl.UTF-8):	Wtyczka VMware VDDK dla nbdkitu
@@ -166,6 +223,8 @@ Plik nagłówkowy dla wtyczek nbdkit.
 %prep
 %setup -q
 
+%{__sed} -i -e '/PKG_CHECK_MODULES(\[RUBY/ s/ruby/ruby-2.6/' configure.ac
+
 %build
 %{__libtoolize}
 %{__aclocal} -I m4
@@ -173,14 +232,18 @@ Plik nagłówkowy dla wtyczek nbdkit.
 %{__autoheader}
 %{__automake}
 %configure \
+	GENISOIMAGE=/usr/bin/genisoimage \
 	GUESTFISH=no \
 	MKISOFS=/usr/bin/mkisofs \
-	%{!?with_go:--disable-golang} \
+	%{!?with_golang:--disable-golang} \
+	%{!?with_lua:--disable-lua} \
 	%{!?with_ocaml:--disable-ocaml} \
 	%{!?with_perl:--disable-perl} \
 	%{!?with_python:--disable-python} \
+	%{!?with_ruby:--disable-ruby} \
 	%{!?with_rust:--disable-rust} \
 	--disable-static \
+	%{!?with_tcl:--disable-tcl} \
 	%{?with_vddk:--with-vddk}
 
 %{__make} \
@@ -262,7 +325,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-gzip-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-info-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-iso-plugin.so
-%attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-lua-plugin.so
+%attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-linuxdisk-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-memory-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-nbd-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-null-plugin.so
@@ -281,9 +344,10 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-torrent-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-zero-plugin.so
 %{_mandir}/man1/nbdkit.1*
+%{_mandir}/man1/nbdkit-S3-plugin.1*
 %{_mandir}/man1/nbdkit-blocksize-filter.1*
-%{_mandir}/man1/nbdkit-cacheextents-filter.1*
 %{_mandir}/man1/nbdkit-cache-filter.1*
+%{_mandir}/man1/nbdkit-cacheextents-filter.1*
 %{_mandir}/man1/nbdkit-captive.1*
 %{_mandir}/man1/nbdkit-cdi-plugin.1*
 %{_mandir}/man1/nbdkit-checkwrite-filter.1*
@@ -313,6 +377,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/nbdkit-ip-filter.1*
 %{_mandir}/man1/nbdkit-iso-plugin.1*
 %{_mandir}/man1/nbdkit-limit-filter.1*
+%{_mandir}/man1/nbdkit-linuxdisk-plugin.1*
 %{_mandir}/man1/nbdkit-log-filter.1*
 %{_mandir}/man1/nbdkit-loop.1*
 %{_mandir}/man1/nbdkit-memory-plugin.1*
@@ -334,6 +399,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/nbdkit-random-plugin.1*
 %{_mandir}/man1/nbdkit-rate-filter.1*
 %{_mandir}/man1/nbdkit-readahead-filter.1*
+%{_mandir}/man1/nbdkit-release-notes-1.4.1*
+%{_mandir}/man1/nbdkit-release-notes-1.6.1*
+%{_mandir}/man1/nbdkit-release-notes-1.8.1*
 %{_mandir}/man1/nbdkit-release-notes-1.10.1*
 %{_mandir}/man1/nbdkit-release-notes-1.12.1*
 %{_mandir}/man1/nbdkit-release-notes-1.14.1*
@@ -342,11 +410,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/nbdkit-release-notes-1.20.1*
 %{_mandir}/man1/nbdkit-release-notes-1.22.1*
 %{_mandir}/man1/nbdkit-release-notes-1.24.1*
-%{_mandir}/man1/nbdkit-release-notes-1.4.1*
-%{_mandir}/man1/nbdkit-release-notes-1.6.1*
-%{_mandir}/man1/nbdkit-release-notes-1.8.1*
 %{_mandir}/man1/nbdkit-retry-filter.1*
-%{_mandir}/man1/nbdkit-S3-plugin.1*
 %{_mandir}/man1/nbdkit-security.1*
 %{_mandir}/man1/nbdkit-service.1*
 %{_mandir}/man1/nbdkit-sparse-random-plugin.1*
@@ -364,6 +428,15 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/nbdkit-truncate-filter.1*
 %{_mandir}/man1/nbdkit-xz-filter.1*
 %{_mandir}/man1/nbdkit-zero-plugin.1*
+%if %{with rust}
+%{_mandir}/man3/nbdkit-rust-plugin.3*
+%endif
+%{_mandir}/man3/nbdkit-sh-plugin.3*
+%{_mandir}/man3/nbdkit-tcl-plugin.3*
+
+%files -n bash-completion-nbdkit
+%defattr(644,root,root,755)
+%{bash_compdir}/nbdkit
 
 %files plugin-curl
 %defattr(644,root,root,755)
@@ -380,11 +453,18 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-libvirt-plugin.so
 %{_mandir}/man1/nbdkit-libvirt-plugin.1*
 
-%if %{with go}
+%if %{with golang}
 %files plugin-go
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-golang-plugin.so
 %{_mandir}/man3/nbdkit-golang-plugin.3*
+%endif
+
+%if %{with lua}
+%files plugin-lua
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-lua-plugin.so
+%{_mandir}/man3/nbdkit-lua-plugin.3*
 %endif
 
 %if %{with ocaml}
@@ -407,6 +487,13 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/nbdkit-perl-plugin.3*
 %endif
 
+%if %{with ruby}
+%files plugin-ruby
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-ruby-plugin.so
+%{_mandir}/man3/nbdkit-ruby-plugin.3*
+%endif
+
 %if %{with python}
 %files plugin-python
 %defattr(644,root,root,755)
@@ -423,15 +510,12 @@ rm -rf $RPM_BUILD_ROOT
 
 %files devel
 %defattr(644,root,root,755)
+%{_includedir}/nbd-protocol.h
 %{_includedir}/nbdkit-common.h
 %{_includedir}/nbdkit-filter.h
 %{_includedir}/nbdkit-plugin.h
 %{_includedir}/nbdkit-version.h
-%{_includedir}/nbd-protocol.h
-%{_mandir}/man3/nbdkit-plugin.3*
 %{_pkgconfigdir}/nbdkit.pc
 %{_mandir}/man3/nbdkit-cc-plugin.3*
 %{_mandir}/man3/nbdkit-filter.3*
-%{_mandir}/man3/nbdkit-lua-plugin.3*
-%{_mandir}/man3/nbdkit-sh-plugin.3*
-%{_mandir}/man3/nbdkit-tcl-plugin.3*
+%{_mandir}/man3/nbdkit-plugin.3*
