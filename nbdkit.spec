@@ -1,4 +1,5 @@
 # TODO:
+# - libblkio
 # --enable-valgrind (valgrind extensions)?
 #
 # Conditional build:
@@ -23,18 +24,18 @@
 Summary:	Toolkit for creating NBD servers
 Summary(pl.UTF-8):	Narzędzia do tworzenia serwerów NBD
 Name:		nbdkit
-Version:	1.24.2
-Release:	5
+Version:	1.34.1
+Release:	1
 License:	BSD
 Group:		Applications/System
-Source0:	https://download.libguestfs.org/nbdkit/1.24-stable/%{name}-%{version}.tar.gz
-# Source0-md5:	ba9319e544d5a728ebfee84953968b9e
+Source0:	https://download.libguestfs.org/nbdkit/1.34-stable/%{name}-%{version}.tar.gz
+# Source0-md5:	3b2a8218011721439d63e770f22567b4
 URL:		https://libguestfs.org/
 BuildRequires:	autoconf >= 2.50
 BuildRequires:	automake
 BuildRequires:	bash-completion-devel >= 1:2.0
 %{?with_rust:BuildRequires:	cargo}
-BuildRequires:	curl-devel
+BuildRequires:	curl-devel >= 7.54.0
 # for mke2fs options detection (incl. -d option support)
 BuildRequires:	e2fsprogs >= 1.43
 BuildRequires:	e2fsprogs-devel
@@ -95,6 +96,7 @@ Summary:	curl plugin for nbdkit
 Summary(pl.UTF-8):	Wtyczka curl dla nbdkitu
 Group:		Libraries
 Requires:	%{name} = %{version}-%{release}
+Requires:	curl-libs >= 7.54.0
 
 %description plugin-curl
 curl plugin for nbdkit.
@@ -276,11 +278,12 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
-%doc LICENSE README TODO
+%doc LICENSE OTHER_PLUGINS README.md SECURITY TODO
 %attr(755,root,root) %{_sbindir}/nbdkit
 %dir %{_libdir}/nbdkit
 %dir %{_libdir}/nbdkit/filters
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-blocksize-filter.so
+%attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-blocksize-policy-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-cache-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-cacheextents-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-checkwrite-filter.so
@@ -298,6 +301,8 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-ip-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-limit-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-log-filter.so
+%attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-luks-filter.so
+%attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-multi-conn-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-nocache-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-noextents-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-nofilter-filter.so
@@ -306,9 +311,12 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-offset-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-partition-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-pause-filter.so
+%attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-protect-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-rate-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-readahead-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-retry-filter.so
+%attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-retry-request-filter.so
+%attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-scan-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-stats-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-swab-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-tar-filter.so
@@ -328,7 +336,6 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-file-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-floppy-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-full-plugin.so
-%attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-gzip-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-info-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-iso-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-linuxdisk-plugin.so
@@ -343,8 +350,6 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-sparse-random-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-split-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-ssh-plugin.so
-%attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-streaming-plugin.so
-%attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-tar-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-tcl-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-tmpdisk-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-torrent-plugin.so
@@ -352,6 +357,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/nbdkit.1*
 %{_mandir}/man1/nbdkit-S3-plugin.1*
 %{_mandir}/man1/nbdkit-blocksize-filter.1*
+%{_mandir}/man1/nbdkit-blocksize-policy-filter.1*
 %{_mandir}/man1/nbdkit-cache-filter.1*
 %{_mandir}/man1/nbdkit-cacheextents-filter.1*
 %{_mandir}/man1/nbdkit-captive.1*
@@ -378,7 +384,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/nbdkit-fua-filter.1*
 %{_mandir}/man1/nbdkit-full-plugin.1*
 %{_mandir}/man1/nbdkit-gzip-filter.1*
-%{_mandir}/man1/nbdkit-gzip-plugin.1*
 %{_mandir}/man1/nbdkit-info-plugin.1*
 %{_mandir}/man1/nbdkit-ip-filter.1*
 %{_mandir}/man1/nbdkit-iso-plugin.1*
@@ -386,7 +391,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/nbdkit-linuxdisk-plugin.1*
 %{_mandir}/man1/nbdkit-log-filter.1*
 %{_mandir}/man1/nbdkit-loop.1*
+%{_mandir}/man1/nbdkit-luks-filter.1*
 %{_mandir}/man1/nbdkit-memory-plugin.1*
+%{_mandir}/man1/nbdkit-multi-conn-filter.1*
 %{_mandir}/man1/nbdkit-nbd-plugin.1*
 %{_mandir}/man1/nbdkit-nocache-filter.1*
 %{_mandir}/man1/nbdkit-noextents-filter.1*
@@ -401,6 +408,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/nbdkit-pattern-plugin.1*
 %{_mandir}/man1/nbdkit-pause-filter.1*
 %{_mandir}/man1/nbdkit-probing.1*
+%{_mandir}/man1/nbdkit-protect-filter.1*
 %{_mandir}/man1/nbdkit-protocol.1*
 %{_mandir}/man1/nbdkit-random-plugin.1*
 %{_mandir}/man1/nbdkit-rate-filter.1*
@@ -416,17 +424,22 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/nbdkit-release-notes-1.20.1*
 %{_mandir}/man1/nbdkit-release-notes-1.22.1*
 %{_mandir}/man1/nbdkit-release-notes-1.24.1*
+%{_mandir}/man1/nbdkit-release-notes-1.26.1*
+%{_mandir}/man1/nbdkit-release-notes-1.28.1*
+%{_mandir}/man1/nbdkit-release-notes-1.30.1*
+%{_mandir}/man1/nbdkit-release-notes-1.32.1*
+%{_mandir}/man1/nbdkit-release-notes-1.34.1*
 %{_mandir}/man1/nbdkit-retry-filter.1*
+%{_mandir}/man1/nbdkit-retry-request-filter.1*
+%{_mandir}/man1/nbdkit-scan-filter.1*
 %{_mandir}/man1/nbdkit-security.1*
 %{_mandir}/man1/nbdkit-service.1*
 %{_mandir}/man1/nbdkit-sparse-random-plugin.1*
 %{_mandir}/man1/nbdkit-split-plugin.1*
 %{_mandir}/man1/nbdkit-ssh-plugin.1*
 %{_mandir}/man1/nbdkit-stats-filter.1*
-%{_mandir}/man1/nbdkit-streaming-plugin.1*
 %{_mandir}/man1/nbdkit-swab-filter.1*
 %{_mandir}/man1/nbdkit-tar-filter.1*
-%{_mandir}/man1/nbdkit-tar-plugin.1*
 %{_mandir}/man1/nbdkit-tls.1*
 %{_mandir}/man1/nbdkit-tls-fallback-filter.1*
 %{_mandir}/man1/nbdkit-tmpdisk-plugin.1*
