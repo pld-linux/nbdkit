@@ -225,6 +225,9 @@ Plik nagłówkowy dla wtyczek nbdkit.
 
 %{__sed} -i -e '/PKG_CHECK_MODULES(\[RUBY/ s/ruby/ruby-2.6/' configure.ac
 
+# use full path, don't require /sbin in $PATH
+%{__sed} -i -e 's,mke2fs -,/sbin/mke2fs -,' configure.ac
+
 %build
 %{__libtoolize}
 %{__aclocal} -I m4
