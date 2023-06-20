@@ -10,11 +10,14 @@
 %bcond_without	ruby		# Ruby language plugin
 %bcond_with	rust		# Rust language plugin
 %bcond_without	tcl		# Tcl language plugin
-%bcond_with	vddk		# VMware VDDK plugin [needs proprietary VDDK]
+%bcond_without	vddk		# VMware VDDK plugin (x86_64 only)
 #
 %ifnarch %{ix86} %{x8664} %{arm} aarch64 ppc sparc sparcv9
 %undefine	with_ocaml
 %undefine	with_golang
+%endif
+%ifnarch %{x8664}
+%undefine	with_vddk
 %endif
 
 Summary:	Toolkit for creating NBD servers
@@ -247,7 +250,7 @@ Plik nagłówkowy dla wtyczek nbdkit.
 	%{!?with_rust:--disable-rust} \
 	--disable-static \
 	%{!?with_tcl:--disable-tcl} \
-	%{?with_vddk:--with-vddk}
+	%{!?with_vddk:--without-vddk}
 
 %{__make} \
 	INSTALLDIRS=vendor
