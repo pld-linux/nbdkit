@@ -1,5 +1,4 @@
 # TODO:
-# - libblkio
 # --enable-valgrind (valgrind extensions)?
 #
 # Conditional build:
@@ -11,11 +10,15 @@
 %bcond_without	ruby		# Ruby language plugin
 %bcond_with	rust		# Rust language plugin
 %bcond_without	tcl		# Tcl language plugin
+%bcond_without	libblkio	# libblkio plugin (rust)
 %bcond_without	vddk		# VMware VDDK plugin (x86_64 only)
 #
 %ifnarch %{ix86} %{x8664} %{arm} aarch64 ppc sparc sparcv9
 %undefine	with_ocaml
 %undefine	with_golang
+%endif
+%ifnarch %{x8664} %{ix86} x32 aarch64 armv6hl armv7hl armv7hnl
+%undefine	with_libblkio
 %endif
 %ifnarch %{x8664}
 %undefine	with_vddk
@@ -25,7 +28,7 @@ Summary:	Toolkit for creating NBD servers
 Summary(pl.UTF-8):	Narzędzia do tworzenia serwerów NBD
 Name:		nbdkit
 Version:	1.34.1
-Release:	1
+Release:	2
 License:	BSD
 Group:		Applications/System
 Source0:	https://download.libguestfs.org/nbdkit/1.34-stable/%{name}-%{version}.tar.gz
@@ -252,6 +255,7 @@ Plik nagłówkowy dla wtyczek nbdkit.
 	%{!?with_rust:--disable-rust} \
 	--disable-static \
 	%{!?with_tcl:--disable-tcl} \
+	%{!?with_libblkio:--disable-libblkio} \
 	%{!?with_vddk:--without-vddk}
 
 %{__make} \
@@ -325,6 +329,9 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-xz-filter.so
 %dir %{_libdir}/nbdkit/plugins
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-S3-plugin
+%if %{with libblkio}
+%attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-blkio-plugin.so
+%endif
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-cc-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-cdi-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-data-plugin.so
@@ -356,6 +363,9 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-zero-plugin.so
 %{_mandir}/man1/nbdkit.1*
 %{_mandir}/man1/nbdkit-S3-plugin.1*
+%if %{with libblkio}
+%{_mandir}/man1/nbdkit-blkio-plugin.1*
+%endif
 %{_mandir}/man1/nbdkit-blocksize-filter.1*
 %{_mandir}/man1/nbdkit-blocksize-policy-filter.1*
 %{_mandir}/man1/nbdkit-cache-filter.1*
