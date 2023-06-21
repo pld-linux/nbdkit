@@ -58,6 +58,7 @@ BuildRequires:	libvirt-devel
 BuildRequires:	perl-tools-pod
 BuildRequires:	pkgconfig
 %{?with_python:BuildRequires:	python3-devel >= 1:3.2}
+BuildRequires:	rpm-build >= 4.6
 %{?with_ruby:BuildRequires:	ruby-devel >= 1:2.6}
 BuildRequires:	sed >= 4.0
 %{?with_tcl:BuildRequires:	tcl-devel >= 8.6}
@@ -87,6 +88,7 @@ Summary(pl.UTF-8):	Bashowe uzupełnianie składni poleceń nbdkit
 Group:		Applications/Shells
 Requires:	%{name} = %{version}-%{release}
 Requires:	bash-completion >= 1:2.0
+BuildArch:	noarch
 
 %description -n bash-completion-nbdkit
 Bash completion for nbdkit commands.
