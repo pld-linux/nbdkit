@@ -44,6 +44,7 @@ BuildRequires:	e2fsprogs >= 1.43
 BuildRequires:	e2fsprogs-devel
 BuildRequires:	gnutls-devel >= 3.3.0
 %{?with_golang:BuildRequires:	golang-devel}
+%{?with_libblkio:BuildRequires:	libblkio-devel}
 BuildRequires:	libcom_err-devel
 BuildRequires:	libguestfs-devel
 BuildRequires:	libnbd-devel >= 0.9.8
@@ -257,7 +258,7 @@ Plik nagłówkowy dla wtyczek nbdkit.
 	%{!?with_rust:--disable-rust} \
 	--disable-static \
 	%{!?with_tcl:--disable-tcl} \
-	%{!?with_libblkio:--disable-libblkio} \
+	%{!?with_libblkio:--without-libblkio} \
 	%{!?with_vddk:--without-vddk}
 
 %{__make} \
