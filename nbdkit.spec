@@ -28,7 +28,7 @@ Summary:	Toolkit for creating NBD servers
 Summary(pl.UTF-8):	Narzędzia do tworzenia serwerów NBD
 Name:		nbdkit
 Version:	1.38.2
-Release:	1
+Release:	2
 License:	BSD
 Group:		Applications/System
 Source0:	https://download.libguestfs.org/nbdkit/1.38-stable/%{name}-%{version}.tar.gz
