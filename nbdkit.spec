@@ -12,6 +12,9 @@
 %bcond_without	tcl		# Tcl language plugin
 %bcond_without	libblkio	# libblkio plugin (rust)
 %bcond_without	vddk		# VMware VDDK plugin (x86_64 only)
+%bcond_without	guestfs		# guestfs plugin
+%bcond_without	libvirt		# libvirt plugin
+%bcond_without	torrent		# torrent plugin
 #
 %ifnarch %{ix86} %{x8664} %{arm} aarch64 ppc sparc sparcv9
 %undefine	with_ocaml
@@ -46,13 +49,13 @@ BuildRequires:	gnutls-devel >= 3.3.0
 %{?with_golang:BuildRequires:	golang-devel}
 %{?with_libblkio:BuildRequires:	libblkio-devel}
 BuildRequires:	libcom_err-devel
-BuildRequires:	libguestfs-devel
+%{?with_guestfs:BuildRequires:	libguestfs-devel}
 BuildRequires:	libnbd-devel >= 0.9.8
 BuildRequires:	libselinux-devel >= 2.0.90
 BuildRequires:	libssh-devel >= 0.8.0
 BuildRequires:	libtool >= 2:2
-BuildRequires:	libtorrent-rasterbar-devel
-BuildRequires:	libvirt-devel
+%{?with_torrent:BuildRequires:	libtorrent-rasterbar-devel}
+%{?with_libvirt:BuildRequires:	libvirt-devel}
 %{?with_lua:BuildRequires:	lua-devel >= 5.1}
 %{?with_ocaml:BuildRequires:	ocaml >= 4.02.2}
 %{?with_perl:BuildRequires:	perl-devel}
@@ -259,7 +262,10 @@ Plik nagłówkowy dla wtyczek nbdkit.
 	--disable-static \
 	%{!?with_tcl:--disable-tcl} \
 	%{!?with_libblkio:--without-libblkio} \
-	%{!?with_vddk:--without-vddk}
+	%{!?with_vddk:--without-vddk} \
+	%{!?with_guestfs:--without-libguestfs} \
+	%{!?with_libvirt:--without-libvirt} \
+	%{!?with_torrent:--disable-torrent}
 
 %{__make} \
 	INSTALLDIRS=vendor
@@ -367,7 +373,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-ssh-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-tcl-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-tmpdisk-plugin.so
-%attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-torrent-plugin.so
+%{?with_torrent:%attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-torrent-plugin.so}
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-zero-plugin.so
 %{_mandir}/man1/nbdkit.1*
 %{_mandir}/man1/nbdkit-S3-plugin.1*
@@ -468,7 +474,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/nbdkit-tls.1*
 %{_mandir}/man1/nbdkit-tls-fallback-filter.1*
 %{_mandir}/man1/nbdkit-tmpdisk-plugin.1*
-%{_mandir}/man1/nbdkit-torrent-plugin.1*
+%{?with_torrent:%{_mandir}/man1/nbdkit-torrent-plugin.1*}
 %{_mandir}/man1/nbdkit-truncate-filter.1*
 %{_mandir}/man1/nbdkit-xz-filter.1*
 %{_mandir}/man1/nbdkit-zero-plugin.1*
@@ -487,15 +493,19 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-curl-plugin.so
 %{_mandir}/man1/nbdkit-curl-plugin.1*
 
+%if %{with guestfs}
 %files plugin-guestfs
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-guestfs-plugin.so
 %{_mandir}/man1/nbdkit-guestfs-plugin.1*
+%endif
 
+%if %{with libvirt}
 %files plugin-libvirt
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-libvirt-plugin.so
 %{_mandir}/man1/nbdkit-libvirt-plugin.1*
+%endif
 
 %if %{with golang}
 %files plugin-go
