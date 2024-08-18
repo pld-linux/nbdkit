@@ -7,7 +7,6 @@
 %bcond_without	ocaml		# OCaml language plugin (requires ocaml_opt support)
 %bcond_without	perl		# Perl language plugin
 %bcond_without	python		# Python language plugin
-%bcond_without	ruby		# Ruby language plugin
 %bcond_with	rust		# Rust language plugin
 %bcond_without	tcl		# Tcl language plugin
 %bcond_without	libblkio	# libblkio plugin (rust)
@@ -30,22 +29,23 @@
 Summary:	Toolkit for creating NBD servers
 Summary(pl.UTF-8):	Narzędzia do tworzenia serwerów NBD
 Name:		nbdkit
-Version:	1.38.2
-Release:	2
+Version:	1.40.1
+Release:	1
 License:	BSD
 Group:		Applications/System
-Source0:	https://download.libguestfs.org/nbdkit/1.38-stable/%{name}-%{version}.tar.gz
-# Source0-md5:	a33a75a0cc358c48ee8e478a8acf2abb
+Source0:	https://download.libguestfs.org/nbdkit/1.40-stable/%{name}-%{version}.tar.gz
+# Source0-md5:	f198e6852e8b6f3a4ce9c17a81cdd98c
 URL:		https://libguestfs.org/
 BuildRequires:	autoconf >= 2.50
 BuildRequires:	automake
 BuildRequires:	bash-completion-devel >= 1:2.0
+BuildRequires:	bzip2-devel
 %{?with_rust:BuildRequires:	cargo}
 BuildRequires:	curl-devel >= 8.3.1
 # for mke2fs options detection (incl. -d option support)
 BuildRequires:	e2fsprogs >= 1.43
 BuildRequires:	e2fsprogs-devel
-BuildRequires:	gnutls-devel >= 3.3.0
+BuildRequires:	gnutls-devel >= 3.5.18
 %{?with_golang:BuildRequires:	golang-devel}
 %{?with_libblkio:BuildRequires:	libblkio-devel}
 BuildRequires:	libcom_err-devel
@@ -63,12 +63,13 @@ BuildRequires:	perl-tools-pod
 BuildRequires:	pkgconfig
 %{?with_python:BuildRequires:	python3-devel >= 1:3.2}
 BuildRequires:	rpm-build >= 4.6
-%{?with_ruby:BuildRequires:	ruby-devel >= 1:2.6}
 BuildRequires:	sed >= 4.0
 %{?with_tcl:BuildRequires:	tcl-devel >= 8.6}
 BuildRequires:	xz-devel
 BuildRequires:	zlib-devel >= 1.2.3.5
 BuildRequires:	zstd-devel
+Requires:	gnutls-libs >= 3.5.18
+Obsoletes:	nbdkit-plugin-ruby < 1.40.0
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 # depends on symbols from nbdkit binary and ocaml ABI
@@ -198,18 +199,6 @@ Python embed plugin for nbdkit.
 %description plugin-python -l pl.UTF-8
 Wtyczka wbudowanego Pythona dla nbdkitu.
 
-%package plugin-ruby
-Summary:	Ruby embed plugin for nbdkit
-Summary(pl.UTF-8):	Wtyczka wbudowanego Ruby dla nbdkitu
-Group:		Libraries
-Requires:	%{name} = %{version}-%{release}
-
-%description plugin-ruby
-Ruby embed plugin for nbdkit.
-
-%description plugin-ruby -l pl.UTF-8
-Wtyczka wbudowanego Ruby dla nbdkitu.
-
 %package plugin-vddk
 Summary:	VMware VDDK plugin for nbdkit
 Summary(pl.UTF-8):	Wtyczka VMware VDDK dla nbdkitu
@@ -237,8 +226,6 @@ Plik nagłówkowy dla wtyczek nbdkit.
 %prep
 %setup -q
 
-%{__sed} -i -e '/PKG_CHECK_MODULES(\[RUBY/ s/ruby/ruby-2.6/' configure.ac
-
 # use full path, don't require /sbin in $PATH
 %{__sed} -i -e 's,mke2fs -,/sbin/mke2fs -,' configure.ac
 
@@ -257,7 +244,6 @@ Plik nagłówkowy dla wtyczek nbdkit.
 	%{!?with_ocaml:--disable-ocaml} \
 	%{!?with_perl:--disable-perl} \
 	%{!?with_python:--disable-python} \
-	%{!?with_ruby:--disable-ruby} \
 	%{!?with_rust:--disable-rust} \
 	--disable-static \
 	%{!?with_tcl:--disable-tcl} \
@@ -297,6 +283,7 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_libdir}/nbdkit/filters
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-blocksize-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-blocksize-policy-filter.so
+%attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-bzip2-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-cache-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-cacheextents-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-checkwrite-filter.so
@@ -332,7 +319,9 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-readonly-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-retry-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-retry-request-filter.so
+%attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-rotational-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-scan-filter.so
+%attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-spinning-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-stats-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-swab-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-tar-filter.so
@@ -382,6 +371,7 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 %{_mandir}/man1/nbdkit-blocksize-filter.1*
 %{_mandir}/man1/nbdkit-blocksize-policy-filter.1*
+%{_mandir}/man1/nbdkit-bzip2-filter.1*
 %{_mandir}/man1/nbdkit-cache-filter.1*
 %{_mandir}/man1/nbdkit-cacheextents-filter.1*
 %{_mandir}/man1/nbdkit-captive.1*
@@ -460,9 +450,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/nbdkit-release-notes-1.34.1*
 %{_mandir}/man1/nbdkit-release-notes-1.36.1*
 %{_mandir}/man1/nbdkit-release-notes-1.38.1*
+%{_mandir}/man1/nbdkit-release-notes-1.40.1*
 %{_mandir}/man1/nbdkit-retry-filter.1*
 %{_mandir}/man1/nbdkit-retry-request-filter.1*
+%{_mandir}/man1/nbdkit-rotational-filter.1*
 %{_mandir}/man1/nbdkit-scan-filter.1*
+%{_mandir}/man1/nbdkit-spinning-filter.1*
 %{_mandir}/man1/nbdkit-security.1*
 %{_mandir}/man1/nbdkit-service.1*
 %{_mandir}/man1/nbdkit-sparse-random-plugin.1*
@@ -541,13 +534,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/nbdkit-perl-plugin.3*
 %endif
 
-%if %{with ruby}
-%files plugin-ruby
-%defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-ruby-plugin.so
-%{_mandir}/man3/nbdkit-ruby-plugin.3*
-%endif
-
 %if %{with python}
 %files plugin-python
 %defattr(644,root,root,755)
@@ -573,3 +559,23 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/nbdkit-cc-plugin.3*
 %{_mandir}/man3/nbdkit-filter.3*
 %{_mandir}/man3/nbdkit-plugin.3*
+%{_mandir}/man3/nbdkit_absolute_path.3*
+%{_mandir}/man3/nbdkit_debug.3*
+%{_mandir}/man3/nbdkit_disconnect.3*
+%{_mandir}/man3/nbdkit_error.3*
+%{_mandir}/man3/nbdkit_export_name.3*
+%{_mandir}/man3/nbdkit_is_tls.3*
+%{_mandir}/man3/nbdkit_nanosleep.3*
+%{_mandir}/man3/nbdkit_parse_*.3*
+%{_mandir}/man3/nbdkit_peer_*.3*
+%{_mandir}/man3/nbdkit_printf_intern.3*
+%{_mandir}/man3/nbdkit_read_password.3*
+%{_mandir}/man3/nbdkit_realpath.3*
+%{_mandir}/man3/nbdkit_set_error.3*
+%{_mandir}/man3/nbdkit_shutdown.3*
+%{_mandir}/man3/nbdkit_stdio_safe.3*
+%{_mandir}/man3/nbdkit_strdup_intern.3*
+%{_mandir}/man3/nbdkit_strndup_intern.3*
+%{_mandir}/man3/nbdkit_vdebug.3*
+%{_mandir}/man3/nbdkit_verror.3*
+%{_mandir}/man3/nbdkit_vprintf_intern.3*
