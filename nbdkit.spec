@@ -199,6 +199,20 @@ Python embed plugin for nbdkit.
 %description plugin-python -l pl.UTF-8
 Wtyczka wbudowanego Pythona dla nbdkitu.
 
+%package plugin-torrent
+Summary:	Torrent plugin for nbdkit
+Summary(pl.UTF-8):	Wtyczka Torrent dla nbdkitu
+Group:		Libraries
+Requires:	%{name} = %{version}-%{release}
+
+%description plugin-torrent
+Torrent plugin for nbdkit to serve a BitTorrent file or magnet link
+over NBD.
+
+%description plugin-torrent -l pl.UTF-8
+Wtyczka Torrent dla nbdkitu do serwowania plików BitTorrenta lub
+odnośników magnet po NBD.
+
 %package plugin-vddk
 Summary:	VMware VDDK plugin for nbdkit
 Summary(pl.UTF-8):	Wtyczka VMware VDDK dla nbdkitu
@@ -362,7 +376,6 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-ssh-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-tcl-plugin.so
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-tmpdisk-plugin.so
-%{?with_torrent:%attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-torrent-plugin.so}
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-zero-plugin.so
 %{_mandir}/man1/nbdkit.1*
 %{_mandir}/man1/nbdkit-S3-plugin.1*
@@ -467,7 +480,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/nbdkit-tls.1*
 %{_mandir}/man1/nbdkit-tls-fallback-filter.1*
 %{_mandir}/man1/nbdkit-tmpdisk-plugin.1*
-%{?with_torrent:%{_mandir}/man1/nbdkit-torrent-plugin.1*}
 %{_mandir}/man1/nbdkit-truncate-filter.1*
 %{_mandir}/man1/nbdkit-xz-filter.1*
 %{_mandir}/man1/nbdkit-zero-plugin.1*
@@ -539,6 +551,13 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-python-plugin.so
 %{_mandir}/man3/nbdkit-python-plugin.3*
+%endif
+
+%if %{with torrent}
+%files plugin-torrent
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-torrent-plugin.so
+%{_mandir}/man1/nbdkit-torrent-plugin.1*
 %endif
 
 %if %{with vddk}
