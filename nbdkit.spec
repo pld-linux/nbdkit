@@ -1,4 +1,5 @@
 # TODO:
+# - zlib-ng?
 # --enable-valgrind (valgrind extensions)?
 #
 # Conditional build:
@@ -29,12 +30,12 @@
 Summary:	Toolkit for creating NBD servers
 Summary(pl.UTF-8):	Narzędzia do tworzenia serwerów NBD
 Name:		nbdkit
-Version:	1.40.1
+Version:	1.40.4
 Release:	1
 License:	BSD
 Group:		Applications/System
 Source0:	https://download.libguestfs.org/nbdkit/1.40-stable/%{name}-%{version}.tar.gz
-# Source0-md5:	f198e6852e8b6f3a4ce9c17a81cdd98c
+# Source0-md5:	71da8b43582b7eb61c5f7680bb3ccd52
 URL:		https://libguestfs.org/
 BuildRequires:	autoconf >= 2.50
 BuildRequires:	automake
@@ -261,11 +262,12 @@ Plik nagłówkowy dla wtyczek nbdkit.
 	%{!?with_rust:--disable-rust} \
 	--disable-static \
 	%{!?with_tcl:--disable-tcl} \
+	%{!?with_torrent:--disable-torrent} \
 	%{!?with_libblkio:--without-libblkio} \
 	%{!?with_vddk:--without-vddk} \
 	%{!?with_guestfs:--without-libguestfs} \
 	%{!?with_libvirt:--without-libvirt} \
-	%{!?with_torrent:--disable-torrent}
+	--without-zlib-ng
 
 %{__make} \
 	INSTALLDIRS=vendor
