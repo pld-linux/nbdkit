@@ -29,12 +29,12 @@
 Summary:	Toolkit for creating NBD servers
 Summary(pl.UTF-8):	Narzędzia do tworzenia serwerów NBD
 Name:		nbdkit
-Version:	1.40.4
-Release:	3
+Version:	1.42.1
+Release:	1
 License:	BSD
 Group:		Applications/System
-Source0:	https://download.libguestfs.org/nbdkit/1.40-stable/%{name}-%{version}.tar.gz
-# Source0-md5:	71da8b43582b7eb61c5f7680bb3ccd52
+Source0:	https://download.libguestfs.org/nbdkit/1.42-stable/%{name}-%{version}.tar.gz
+# Source0-md5:	3254c65c82008a669f967a54a31c3ca4
 URL:		https://libguestfs.org/
 BuildRequires:	autoconf >= 2.50
 BuildRequires:	automake
@@ -253,6 +253,7 @@ Plik nagłówkowy dla wtyczek nbdkit.
 %configure \
 	GENISOIMAGE=/usr/bin/genisoimage \
 	GUESTFISH=no \
+	LZIP=/usr/bin/lzip \
 	MKISOFS=/usr/bin/mkisofs \
 	%{!?with_golang:--disable-golang} \
 	%{!?with_lua:--disable-lua} \
@@ -318,6 +319,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-limit-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-log-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-luks-filter.so
+%attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-lzip-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-multi-conn-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-nocache-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-noextents-filter.so
@@ -340,6 +342,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-stats-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-swab-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-tar-filter.so
+%attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-time-limit-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-tls-fallback-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-truncate-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-xz-filter.so
@@ -422,6 +425,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/nbdkit-log-filter.1*
 %{_mandir}/man1/nbdkit-loop.1*
 %{_mandir}/man1/nbdkit-luks-filter.1*
+%{_mandir}/man1/nbdkit-lzip-filter.1*
 %{_mandir}/man1/nbdkit-memory-plugin.1*
 %{_mandir}/man1/nbdkit-multi-conn-filter.1*
 %{_mandir}/man1/nbdkit-nbd-plugin.1*
@@ -465,6 +469,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/nbdkit-release-notes-1.36.1*
 %{_mandir}/man1/nbdkit-release-notes-1.38.1*
 %{_mandir}/man1/nbdkit-release-notes-1.40.1*
+%{_mandir}/man1/nbdkit-release-notes-1.42.1*
 %{_mandir}/man1/nbdkit-retry-filter.1*
 %{_mandir}/man1/nbdkit-retry-request-filter.1*
 %{_mandir}/man1/nbdkit-rotational-filter.1*
@@ -478,6 +483,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/nbdkit-stats-filter.1*
 %{_mandir}/man1/nbdkit-swab-filter.1*
 %{_mandir}/man1/nbdkit-tar-filter.1*
+%{_mandir}/man1/nbdkit-time-limit-filter.1*
 %{_mandir}/man1/nbdkit-tls.1*
 %{_mandir}/man1/nbdkit-tls-fallback-filter.1*
 %{_mandir}/man1/nbdkit-tmpdisk-plugin.1*
