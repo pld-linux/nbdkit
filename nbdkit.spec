@@ -1,5 +1,4 @@
 # TODO:
-# - zlib-ng?
 # --enable-valgrind (valgrind extensions)?
 #
 # Conditional build:
@@ -68,6 +67,7 @@ BuildRequires:	sed >= 4.0
 %{?with_tcl:BuildRequires:	tcl-devel >= 8.6}
 BuildRequires:	xz-devel
 BuildRequires:	zlib-devel >= 1.2.3.5
+BuildRequires:	zlib-ng-devel
 BuildRequires:	zstd-devel
 Requires:	gnutls-libs >= 3.5.18
 Obsoletes:	nbdkit-plugin-ruby < 1.40.0
@@ -266,8 +266,7 @@ Plik nagłówkowy dla wtyczek nbdkit.
 	%{!?with_libblkio:--without-libblkio} \
 	%{!?with_vddk:--without-vddk} \
 	%{!?with_guestfs:--without-libguestfs} \
-	%{!?with_libvirt:--without-libvirt} \
-	--without-zlib-ng
+	%{!?with_libvirt:--without-libvirt}
 
 %{__make} \
 	INSTALLDIRS=vendor
