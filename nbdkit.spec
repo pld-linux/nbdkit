@@ -29,15 +29,16 @@
 Summary:	Toolkit for creating NBD servers
 Summary(pl.UTF-8):	Narzędzia do tworzenia serwerów NBD
 Name:		nbdkit
-Version:	1.42.4
+Version:	1.44.1
 Release:	1
 License:	BSD
 Group:		Applications/System
-Source0:	https://download.libguestfs.org/nbdkit/1.42-stable/%{name}-%{version}.tar.gz
-# Source0-md5:	dce3fe70889808688617a93b418bcb67
+Source0:	https://download.libguestfs.org/nbdkit/1.44-stable/%{name}-%{version}.tar.gz
+# Source0-md5:	acd2537a4b947a1e820ddcac45ebe646
 URL:		https://libguestfs.org/
 BuildRequires:	autoconf >= 2.50
 BuildRequires:	automake
+BuildRequires:	bash >= 4
 BuildRequires:	bash-completion-devel >= 1:2.0
 BuildRequires:	bzip2-devel
 %{?with_rust:BuildRequires:	cargo}
@@ -51,6 +52,8 @@ BuildRequires:	gnutls-devel >= 3.5.18
 BuildRequires:	libcom_err-devel
 %{?with_guestfs:BuildRequires:	libguestfs-devel}
 BuildRequires:	libnbd-devel >= 0.9.8
+# pkgconfig(libnfs) >= 16
+BuildRequires:	libnfs-devel >= 6
 BuildRequires:	libselinux-devel >= 2.0.90
 BuildRequires:	libssh-devel >= 0.8.0
 BuildRequires:	libtool >= 2:2
@@ -163,6 +166,18 @@ Lua embed plugin for nbdkit.
 %description plugin-lua -l pl.UTF-8
 Wtyczka wbudowanego Lua dla nbdkitu.
 
+%package plugin-nfs
+Summary:	NFS plugin for nbdkit
+Summary(pl.UTF-8):	Wtyczka NFS dla nbdkitu
+Group:		Libraries
+Requires:	%{name} = %{version}-%{release}
+
+%description plugin-nfs
+NFS plugin for nbdkit.
+
+%description plugin-nfs -l pl.UTF-8
+Wtyczka NFS dla nbdkitu.
+
 %package plugin-ocaml
 Summary:	OCaml embed plugin for nbdkit
 Summary(pl.UTF-8):	Wtyczka wbudowanego OCamla dla nbdkitu
@@ -255,6 +270,7 @@ Plik nagłówkowy dla wtyczek nbdkit.
 	GUESTFISH=no \
 	LZIP=/usr/bin/lzip \
 	MKISOFS=/usr/bin/mkisofs \
+	XORRISO=/usr/bin/xorriso \
 	%{!?with_golang:--disable-golang} \
 	%{!?with_lua:--disable-lua} \
 	%{!?with_ocaml:--disable-ocaml} \
@@ -327,6 +343,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-noparallel-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-nozero-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-offset-filter.so
+%attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-openonce-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-partition-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-pause-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-protect-filter.so
@@ -438,6 +455,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/nbdkit-offset-filter.1*
 %{_mandir}/man1/nbdkit-ondemand-plugin.1*
 %{_mandir}/man1/nbdkit-ones-plugin.1*
+%{_mandir}/man1/nbdkit-openonce-filter.1*
 %{_mandir}/man1/nbdkit-partition-filter.1*
 %{_mandir}/man1/nbdkit-partitioning-plugin.1*
 %{_mandir}/man1/nbdkit-pattern-plugin.1*
@@ -470,6 +488,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/nbdkit-release-notes-1.38.1*
 %{_mandir}/man1/nbdkit-release-notes-1.40.1*
 %{_mandir}/man1/nbdkit-release-notes-1.42.1*
+%{_mandir}/man1/nbdkit-release-notes-1.44.1*
 %{_mandir}/man1/nbdkit-retry-filter.1*
 %{_mandir}/man1/nbdkit-retry-request-filter.1*
 %{_mandir}/man1/nbdkit-rotational-filter.1*
@@ -533,6 +552,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/nbdkit-lua-plugin.3*
 %endif
 
+%files plugin-nfs
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-nfs-plugin.so
+%{_mandir}/man1/nbdkit-nfs-plugin.1*
+
 %if %{with ocaml}
 %files plugin-ocaml
 %defattr(644,root,root,755)
@@ -585,6 +609,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/nbdkit-cc-plugin.3*
 %{_mandir}/man3/nbdkit-filter.3*
 %{_mandir}/man3/nbdkit-plugin.3*
+%{_mandir}/man3/nbdkit-tracing.3*
 %{_mandir}/man3/nbdkit_absolute_path.3*
 %{_mandir}/man3/nbdkit_debug.3*
 %{_mandir}/man3/nbdkit_disconnect.3*
