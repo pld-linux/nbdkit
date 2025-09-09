@@ -14,6 +14,7 @@
 %bcond_without	guestfs		# guestfs plugin
 %bcond_without	libvirt		# libvirt plugin
 %bcond_without	torrent		# torrent plugin
+%bcond_with	nfs		# NFS plugin (requires broken libnfs 6)
 #
 %ifnarch %{ix86} %{x8664} %{arm} aarch64 ppc sparc sparcv9
 %undefine	with_ocaml
@@ -30,7 +31,7 @@ Summary:	Toolkit for creating NBD servers
 Summary(pl.UTF-8):	Narzędzia do tworzenia serwerów NBD
 Name:		nbdkit
 Version:	1.44.1
-Release:	3
+Release:	4
 License:	BSD
 Group:		Applications/System
 Source0:	https://download.libguestfs.org/nbdkit/1.44-stable/%{name}-%{version}.tar.gz
@@ -53,7 +54,7 @@ BuildRequires:	libcom_err-devel
 %{?with_guestfs:BuildRequires:	libguestfs-devel}
 BuildRequires:	libnbd-devel >= 0.9.8
 # pkgconfig(libnfs) >= 16
-BuildRequires:	libnfs-devel >= 6
+%{?with_nfs:BuildRequires:	libnfs-devel >= 6}
 BuildRequires:	libselinux-devel >= 2.0.90
 BuildRequires:	libssh-devel >= 0.8.0
 BuildRequires:	libtool >= 2:2
@@ -552,10 +553,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/nbdkit-lua-plugin.3*
 %endif
 
+%if %{with nfs}
 %files plugin-nfs
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-nfs-plugin.so
 %{_mandir}/man1/nbdkit-nfs-plugin.1*
+%endif
 
 %if %{with ocaml}
 %files plugin-ocaml
