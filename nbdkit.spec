@@ -15,6 +15,7 @@
 %bcond_without	libvirt		# libvirt plugin
 %bcond_without	torrent		# torrent plugin
 %bcond_with	nfs		# NFS plugin (requires broken libnfs 6)
+%bcond_without	vram		# Video RAM (OpenCL) plugin
 #
 %ifnarch %{ix86} %{x8664} %{arm} aarch64 ppc sparc sparcv9
 %undefine	with_ocaml
@@ -30,13 +31,14 @@
 Summary:	Toolkit for creating NBD servers
 Summary(pl.UTF-8):	Narzędzia do tworzenia serwerów NBD
 Name:		nbdkit
-Version:	1.44.1
-Release:	4
+Version:	1.46.1
+Release:	1
 License:	BSD
 Group:		Applications/System
-Source0:	https://download.libguestfs.org/nbdkit/1.44-stable/%{name}-%{version}.tar.gz
-# Source0-md5:	acd2537a4b947a1e820ddcac45ebe646
+Source0:	https://download.libguestfs.org/nbdkit/1.46-stable/%{name}-%{version}.tar.gz
+# Source0-md5:	72bb3079e084abd7aefa51d257b8f3fb
 URL:		https://libguestfs.org/
+%{?with_vram:BuildRequires:	OpenCL-devel >= 2.0}
 BuildRequires:	autoconf >= 2.50
 BuildRequires:	automake
 BuildRequires:	bash >= 4
@@ -242,6 +244,18 @@ VMware VDDK plugin for nbdkit.
 %description plugin-vddk -l pl.UTF-8
 Wtyczka VMware VDDK dla nbdkitu.
 
+%package plugin-vram
+Summary:	Video RAM (OpenCL) plugin for nbdkit
+Summary(pl.UTF-8):	Wtyczka Video RAM (OpenCL) dla nbdkitu
+Group:		Libraries
+Requires:	%{name} = %{version}-%{release}
+
+%description plugin-vram
+Video RAM (OpenCL) plugin for nbdkit.
+
+%description plugin-vram -l pl.UTF-8
+Wtyczka Video RAM (OpenCL) dla nbdkitu.
+
 %package devel
 Summary:	Header file for nbdkit plugins
 Summary(pl.UTF-8):	Plik nagłówkowy dla wtyczek nbdkit
@@ -284,7 +298,8 @@ Plik nagłówkowy dla wtyczek nbdkit.
 	%{!?with_libblkio:--without-libblkio} \
 	%{!?with_vddk:--without-vddk} \
 	%{!?with_guestfs:--without-libguestfs} \
-	%{!?with_libvirt:--without-libvirt}
+	%{!?with_libvirt:--without-libvirt} \
+	%{!?with_vram:--disable-vram}
 
 %{__make} \
 	INSTALLDIRS=vendor
@@ -310,7 +325,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
-%doc LICENSE OTHER_PLUGINS README.md SECURITY TODO
+%doc LICENSE OTHER_PLUGINS README.md SECURITY.md TODO.md
 %attr(755,root,root) %{_sbindir}/nbdkit
 %dir %{_libdir}/nbdkit
 %dir %{_libdir}/nbdkit/filters
@@ -318,8 +333,8 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-blocksize-policy-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-bzip2-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-cache-filter.so
-%attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-cacheextents-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-checkwrite-filter.so
+%attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-count-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-cow-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-ddrescue-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-delay-filter.so
@@ -332,11 +347,13 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-extentlist-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-fua-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-gzip-filter.so
+%attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-indexed-gzip-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-ip-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-limit-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-log-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-luks-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-lzip-filter.so
+%attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-map-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-multi-conn-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-nocache-filter.so
 %attr(755,root,root) %{_libdir}/nbdkit/filters/nbdkit-noextents-filter.so
@@ -408,11 +425,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/nbdkit-blocksize-policy-filter.1*
 %{_mandir}/man1/nbdkit-bzip2-filter.1*
 %{_mandir}/man1/nbdkit-cache-filter.1*
-%{_mandir}/man1/nbdkit-cacheextents-filter.1*
 %{_mandir}/man1/nbdkit-captive.1*
 %{_mandir}/man1/nbdkit-cdi-plugin.1*
 %{_mandir}/man1/nbdkit-checkwrite-filter.1*
 %{_mandir}/man1/nbdkit-client.1*
+%{_mandir}/man1/nbdkit-count-filter.1*
 %{_mandir}/man1/nbdkit-cow-filter.1*
 %{_mandir}/man1/nbdkit-data-plugin.1*
 %{_mandir}/man1/nbdkit-ddrescue-filter.1*
@@ -435,6 +452,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/nbdkit-full-plugin.1*
 %{_mandir}/man1/nbdkit-gcs-plugin.1*
 %{_mandir}/man1/nbdkit-gzip-filter.1*
+%{_mandir}/man1/nbdkit-indexed-gzip-filter.1*
 %{_mandir}/man1/nbdkit-info-plugin.1*
 %{_mandir}/man1/nbdkit-ip-filter.1*
 %{_mandir}/man1/nbdkit-iso-plugin.1*
@@ -444,6 +462,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/nbdkit-loop.1*
 %{_mandir}/man1/nbdkit-luks-filter.1*
 %{_mandir}/man1/nbdkit-lzip-filter.1*
+%{_mandir}/man1/nbdkit-map-filter.1*
 %{_mandir}/man1/nbdkit-memory-plugin.1*
 %{_mandir}/man1/nbdkit-multi-conn-filter.1*
 %{_mandir}/man1/nbdkit-nbd-plugin.1*
@@ -490,6 +509,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/nbdkit-release-notes-1.40.1*
 %{_mandir}/man1/nbdkit-release-notes-1.42.1*
 %{_mandir}/man1/nbdkit-release-notes-1.44.1*
+%{_mandir}/man1/nbdkit-release-notes-1.46.1*
 %{_mandir}/man1/nbdkit-retry-filter.1*
 %{_mandir}/man1/nbdkit-retry-request-filter.1*
 %{_mandir}/man1/nbdkit-rotational-filter.1*
@@ -601,6 +621,13 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/nbdkit-vddk-plugin.1*
 %endif
 
+%if %{with vram}
+%files plugin-vram
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/nbdkit/plugins/nbdkit-vram-plugin.so
+%{_mandir}/man1/nbdkit-vram-plugin.1*
+%endif
+
 %files devel
 %defattr(644,root,root,755)
 %{_includedir}/nbd-protocol.h
@@ -615,6 +642,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/nbdkit-tracing.3*
 %{_mandir}/man3/nbdkit_absolute_path.3*
 %{_mandir}/man3/nbdkit_debug.3*
+%{_mandir}/man3/nbdkit_debug_hexdump.3*
 %{_mandir}/man3/nbdkit_disconnect.3*
 %{_mandir}/man3/nbdkit_error.3*
 %{_mandir}/man3/nbdkit_export_name.3*
